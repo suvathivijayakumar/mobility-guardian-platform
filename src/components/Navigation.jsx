@@ -2,19 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
 import sensorData from '../data/sensorData.json';
+import ErrorMessage from './ErrorMessage';
 
 const getNavigationData = () => {
   const directions = sensorData.navigation;
+  if (Math.random() < 0.1) { // Simulate 10% chance of connection error
+    throw new Error('Failed to connect to navigation sensor');
+  }
   return directions[Math.floor(Math.random() * directions.length)];
 };
 
 const Navigation = ({ feedbackType }) => {
   const [currentDirection, setCurrentDirection] = useState('');
 
-  const { data: navigationData } = useQuery({
+  const { data: navigationData, error, isError } = useQuery({
     queryKey: ['navigationData'],
     queryFn: getNavigationData,
     refetchInterval: 5000,
+    retry: 2,
   });
 
   useEffect(() => {
@@ -60,6 +65,15 @@ const Navigation = ({ feedbackType }) => {
         return <ArrowDown className="h-8 w-8" />;
     }
   };
+
+  if (isError) {
+    return (
+      <ErrorMessage 
+        message="Unable to connect to navigation sensor."
+        resolution="Please check your device's connection and restart the app. If the problem persists, contact support."
+      />
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md mb-4">

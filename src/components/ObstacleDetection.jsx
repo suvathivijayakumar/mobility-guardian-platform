@@ -2,19 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
 import sensorData from '../data/sensorData.json';
+import ErrorMessage from './ErrorMessage';
 
 const getObstacleData = () => {
   const obstacles = sensorData.obstacles;
+  if (Math.random() < 0.1) { // Simulate 10% chance of connection error
+    throw new Error('Failed to connect to obstacle detection sensor');
+  }
   return obstacles[Math.floor(Math.random() * obstacles.length)];
 };
 
 const ObstacleDetection = ({ feedbackType }) => {
   const [obstacleDetected, setObstacleDetected] = useState(false);
 
-  const { data: obstacle } = useQuery({
+  const { data: obstacle, error, isError } = useQuery({
     queryKey: ['obstacleData'],
     queryFn: getObstacleData,
     refetchInterval: 2000,
+    retry: 2,
   });
 
   useEffect(() => {
@@ -34,6 +39,15 @@ const ObstacleDetection = ({ feedbackType }) => {
       speechSynthesis.speak(utterance);
     }
   };
+
+  if (isError) {
+    return (
+      <ErrorMessage 
+        message="Unable to connect to obstacle detection sensor."
+        resolution="Please check your device's connection and restart the app. If the problem persists, contact support."
+      />
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
