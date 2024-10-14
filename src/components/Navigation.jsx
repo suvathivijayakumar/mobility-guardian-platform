@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MapPin, ArrowRight, ArrowLeft, ArrowUp, ArrowDown } from 'lucide-react';
+import sensorData from '../data/sensorData.json';
 
-const simulateNavigation = () => {
-  const directions = ['Turn right', 'Go straight', 'Turn left', 'Go straight', 'You have arrived'];
+const getNavigationData = () => {
+  const directions = sensorData.navigation;
   return directions[Math.floor(Math.random() * directions.length)];
 };
 
@@ -12,21 +13,20 @@ const Navigation = ({ feedbackType }) => {
 
   const { data: navigationData } = useQuery({
     queryKey: ['navigationData'],
-    queryFn: simulateNavigation,
-    refetchInterval: 5000, // Update every 5 seconds to simulate movement
+    queryFn: getNavigationData,
+    refetchInterval: 5000,
   });
 
   useEffect(() => {
     if (navigationData) {
-      setCurrentDirection(navigationData);
+      setCurrentDirection(navigationData.instruction);
       provideFeedback(navigationData);
     }
   }, [navigationData]);
 
   const provideFeedback = (direction) => {
     if (feedbackType === 'haptic') {
-      // Simulate haptic feedback
-      switch (direction) {
+      switch (direction.instruction) {
         case 'Turn right':
           navigator.vibrate([100, 50, 100]);
           break;
@@ -41,8 +41,7 @@ const Navigation = ({ feedbackType }) => {
           break;
       }
     } else if (feedbackType === 'audio') {
-      // Simulate audio feedback
-      const utterance = new SpeechSynthesisUtterance(direction);
+      const utterance = new SpeechSynthesisUtterance(`${direction.instruction}. Continue for ${direction.distance} meters.`);
       speechSynthesis.speak(utterance);
     }
   };
@@ -69,6 +68,11 @@ const Navigation = ({ feedbackType }) => {
         {getDirectionIcon()}
       </div>
       <p className="text-lg text-center text-vibrant-text dark:text-white">{currentDirection}</p>
+      {navigationData && (
+        <p className="text-sm text-center text-gray-500 dark:text-gray-400">
+          Continue for {navigationData.distance} meters
+        </p>
+      )}
     </div>
   );
 };

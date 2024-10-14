@@ -1,15 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Calendar, Bell } from 'lucide-react';
 import ObstacleDetection from '../components/ObstacleDetection';
 import Navigation from '../components/Navigation';
 import ActivityTracker from '../components/ActivityTracker';
+import userProfileData from '../data/userProfile.json';
 
 const Dashboard = () => {
-  const [feedbackType, setFeedbackType] = useState('audio');
+  const [feedbackType, setFeedbackType] = useState(userProfileData.preferredFeedback);
+
+  useEffect(() => {
+    localStorage.setItem('userProfile', JSON.stringify(userProfileData));
+  }, []);
 
   return (
     <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-      <h1 className="text-4xl font-semibold text-vibrant-text dark:text-white mb-6">Welcome to Mobility Assistance Platform</h1>
+      <h1 className="text-4xl font-semibold text-vibrant-text dark:text-white mb-6">Welcome, {userProfileData.name}</h1>
       <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">Here you can manage your mobility assistance needs.</p>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

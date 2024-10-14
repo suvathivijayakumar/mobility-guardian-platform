@@ -2,16 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Footprints, Ruler } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const simulateActivityData = () => {
-  const steps = Math.floor(Math.random() * 1000) + 500; // Random steps between 500 and 1500
-  const distance = (steps * 0.762) / 1000; // Approximate distance in km (average step length 76.2 cm)
-  return { steps, distance: distance.toFixed(2) };
-};
+import activityData from '../data/activityData.json';
 
 const getStoredActivityData = () => {
   const storedData = localStorage.getItem('activityData');
-  return storedData ? JSON.parse(storedData) : [];
+  return storedData ? JSON.parse(storedData) : activityData;
+};
+
+const simulateActivityData = () => {
+  const lastActivity = getStoredActivityData().slice(-1)[0];
+  const date = new Date(lastActivity.date);
+  date.setDate(date.getDate() + 1);
+  
+  const steps = Math.floor(Math.random() * 1000) + 7000;
+  const distance = (steps * 0.762) / 1000;
+  
+  return {
+    date: date.toISOString().split('T')[0],
+    steps,
+    distance: distance.toFixed(2)
+  };
 };
 
 const ActivityTracker = () => {
@@ -25,9 +35,9 @@ const ActivityTracker = () => {
 
   useEffect(() => {
     if (currentActivity) {
-      const newHistory = [...activityHistory, { ...currentActivity, date: new Date().toISOString() }];
-      setActivityHistory(newHistory.slice(-7)); // Keep only the last 7 days
-      localStorage.setItem('activityData', JSON.stringify(newHistory.slice(-7)));
+      const newHistory = [...activityHistory, currentActivity].slice(-7);
+      setActivityHistory(newHistory);
+      localStorage.setItem('activityData', JSON.stringify(newHistory));
     }
   }, [currentActivity]);
 
@@ -38,20 +48,20 @@ const ActivityTracker = () => {
         <div className="flex items-center">
           <Footprints className="h-6 w-6 mr-2 text-vibrant-primary" />
           <span className="text-lg font-semibold text-vibrant-text dark:text-white">
-            {currentActivity?.steps || 0} steps
+            {currentActivity?.steps || activityHistory[activityHistory.length - 1].steps} steps
           </span>
         </div>
         <div className="flex items-center">
           <Ruler className="h-6 w-6 mr-2 text-vibrant-secondary" />
           <span className="text-lg font-semibold text-vibrant-text dark:text-white">
-            {currentActivity?.distance || 0} km
+            {currentActivity?.distance || activityHistory[activityHistory.length - 1].distance} km
           </span>
         </div>
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={activityHistory}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" tickFormatter={(tick) => new Date(tick).toLocaleDateString()} />
+          <XAxis dataKey="date" />
           <YAxis yAxisId="left" />
           <YAxis yAxisId="right" orientation="right" />
           <Tooltip />

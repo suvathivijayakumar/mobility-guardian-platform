@@ -1,0 +1,9 @@
+[
+  { "date": "2023-03-01", "steps": 8000, "distance": 6.1 },
+  { "date": "2023-03-02", "steps": 10000, "distance": 7.6 },
+  { "date": "2023-03-03", "steps": 7500, "distance": 5.7 },
+  { "date": "2023-03-04", "steps": 9000, "distance": 6.9 },
+  { "date": "2023-03-05", "steps": 11000, "distance": 8.4 },
+  { "date": "2023-03-06", "steps": 8500, "distance": 6.5 },
+  { "date": "2023-03-07", "steps": 9500, "distance": 7.2 }
+]

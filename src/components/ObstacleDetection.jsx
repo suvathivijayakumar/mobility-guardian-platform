@@ -1,37 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
+import sensorData from '../data/sensorData.json';
 
-const simulateSensorData = () => {
-  // Simulate obstacle detection (random for demo purposes)
-  return Math.random() < 0.3; // 30% chance of detecting an obstacle
+const getObstacleData = () => {
+  const obstacles = sensorData.obstacles;
+  return obstacles[Math.floor(Math.random() * obstacles.length)];
 };
 
 const ObstacleDetection = ({ feedbackType }) => {
   const [obstacleDetected, setObstacleDetected] = useState(false);
 
-  const { data: sensorData } = useQuery({
-    queryKey: ['sensorData'],
-    queryFn: simulateSensorData,
-    refetchInterval: 2000, // Refetch every 2 seconds to simulate real-time updates
+  const { data: obstacle } = useQuery({
+    queryKey: ['obstacleData'],
+    queryFn: getObstacleData,
+    refetchInterval: 2000,
   });
 
   useEffect(() => {
-    if (sensorData) {
-      setObstacleDetected(sensorData);
-      if (sensorData) {
-        provideFeedback();
+    if (obstacle) {
+      setObstacleDetected(obstacle.distance < 3);
+      if (obstacle.distance < 3) {
+        provideFeedback(obstacle);
       }
     }
-  }, [sensorData]);
+  }, [obstacle]);
 
-  const provideFeedback = () => {
+  const provideFeedback = (obstacle) => {
     if (feedbackType === 'haptic') {
-      // Simulate haptic feedback
-      navigator.vibrate([100, 50, 100, 50, 100, 50, 100]);
+      navigator.vibrate([100, 50, 100, 50, 100]);
     } else if (feedbackType === 'audio') {
-      // Simulate audio feedback
-      const utterance = new SpeechSynthesisUtterance("Caution! Obstacle detected.");
+      const utterance = new SpeechSynthesisUtterance(`Caution! ${obstacle.type} detected ${obstacle.distance} meters ahead.`);
       speechSynthesis.speak(utterance);
     }
   };
@@ -42,7 +41,7 @@ const ObstacleDetection = ({ feedbackType }) => {
       {obstacleDetected ? (
         <div className="flex items-center text-red-500">
           <AlertTriangle className="mr-2" />
-          <span>Obstacle detected! Please be cautious.</span>
+          <span>{`${obstacle.type} detected ${obstacle.distance} meters ahead. Be cautious!`}</span>
         </div>
       ) : (
         <div className="text-green-500">Path is clear.</div>
