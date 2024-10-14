@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Calendar, Bell } from 'lucide-react';
 import ObstacleDetection from '../components/ObstacleDetection';
 import Navigation from '../components/Navigation';
+import ActivityTracker from '../components/ActivityTracker';
 
 const Dashboard = () => {
   const [feedbackType, setFeedbackType] = useState('audio');
@@ -41,6 +42,7 @@ const Dashboard = () => {
         </select>
       </div>
 
+      <ActivityTracker />
       <Navigation feedbackType={feedbackType} />
       <ObstacleDetection feedbackType={feedbackType} />
     </div>
