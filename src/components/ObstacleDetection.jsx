@@ -13,27 +13,28 @@ const ObstacleDetection = ({ feedbackType }) => {
   const { data: sensorData } = useQuery({
     queryKey: ['sensorData'],
     queryFn: simulateSensorData,
-    refetchInterval: 1000, // Refetch every second to simulate real-time updates
+    refetchInterval: 2000, // Refetch every 2 seconds to simulate real-time updates
   });
 
   useEffect(() => {
     if (sensorData) {
       setObstacleDetected(sensorData);
+      if (sensorData) {
+        provideFeedback();
+      }
     }
   }, [sensorData]);
 
-  useEffect(() => {
-    if (obstacleDetected) {
-      if (feedbackType === 'haptic') {
-        // Simulate haptic feedback
-        navigator.vibrate(200);
-      } else if (feedbackType === 'audio') {
-        // Simulate audio feedback
-        const audio = new Audio('https://www.soundjay.com/buttons/beep-07.wav');
-        audio.play();
-      }
+  const provideFeedback = () => {
+    if (feedbackType === 'haptic') {
+      // Simulate haptic feedback
+      navigator.vibrate([100, 50, 100, 50, 100, 50, 100]);
+    } else if (feedbackType === 'audio') {
+      // Simulate audio feedback
+      const utterance = new SpeechSynthesisUtterance("Caution! Obstacle detected.");
+      speechSynthesis.speak(utterance);
     }
-  }, [obstacleDetected, feedbackType]);
+  };
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
